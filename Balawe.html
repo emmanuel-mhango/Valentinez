@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Our Valentine Memories</title>
+
+  <style>
+    :root{
+      --bg0:#070710;
+      --bg1:#0d0b18;
+      --glass: rgba(255,255,255,.075);
+      --glass2: rgba(255,255,255,.11);
+      --text: rgba(255,255,255,.94);
+      --muted: rgba(255,255,255,.72);
+      --border: rgba(255,255,255,.14);
+
+      --accent:#ff4fa3;
+      --accent2:#ffb3d8;
+      --accent3:#9f7bff;
+
+      --shadow: 0 24px 70px rgba(0,0,0,.42);
+      --shadow2: 0 14px 40px rgba(0,0,0,.32);
+
+      --radius: 18px;
+      --radius2: 24px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 900px at 20% 0%, rgba(255,79,163,.16), transparent 62%),
+                  radial-gradient(1000px 700px at 90% 30%, rgba(255,179,216,.12), transparent 55%),
+                  radial-gradient(900px 700px at 70% 95%, rgba(159,123,255,.10), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
+
+    /* Animated aura */
+    .aura{
+      position: fixed; inset:-40%;
+      background: conic-gradient(from 210deg,
+        rgba(255,79,163,.14),
+        rgba(159,123,255,.12),
+        rgba(255,179,216,.10),
+        rgba(255,79,163,.14)
+      );
+      filter: blur(60px);
+      opacity:.55;
+      animation: spin 16s linear infinite;
+      pointer-events:none;
+      z-index:0;
+    }
+    @keyframes spin { to{ transform: rotate(360deg); } }
+
+    /* floating tiny sparkles */
+    .sparkles{
+      position: fixed; inset:0;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(255,79,163,.16) 0 2px, transparent 3px),
+        radial-gradient(circle at 50% 60%, rgba(255,179,216,.12) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 30%, rgba(159,123,255,.12) 0 2px, transparent 3px),
+        radial-gradient(circle at 25% 80%, rgba(255,255,255,.08) 0 1px, transparent 2px);
+      opacity:.35;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    /* Topbar */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(7,7,16,.62);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar__inner{
+      width: min(1150px, 92%);
+      margin: 0 auto;
+      padding: 12px 0;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+    .brand__mark{
+      width: 38px; height:38px;
+      display:grid; place-items:center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,79,163,.30), rgba(159,123,255,.18));
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 0 50px rgba(255,79,163,.20);
+      flex: 0 0 auto;
+      position: relative;
+      overflow:hidden;
+    }
+    .brand__mark:before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), transparent 45%);
+      transform: rotate(12deg);
+    }
+
+    .nav{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content:center;
+    }
+    .nav a{
+      text-decoration:none;
+      color: var(--muted);
+      font-weight: 720;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      transition: .15s ease;
+      display:flex; align-items:center; gap:8px;
+    }
+    .nav a:hover{
+      color: var(--text);
+      border-color: var(--border);
+      background: rgba(255,255,255,.05);
+      transform: translateY(-1px);
+    }
+    .nav a.active{
+      color: var(--text);
+      border-color: rgba(255,79,163,.40);
+      background: rgba(255,79,163,.12);
+      box-shadow: 0 0 35px rgba(255,79,163,.12);
+    }
+
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(255,79,163,.40);
+      background: linear-gradient(135deg, rgba(255,79,163,.26), rgba(159,123,255,.12));
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-weight: 820;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      box-shadow: var(--shadow2);
+      transition: transform .15s ease, filter .15s ease;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+    .btn--ghost{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    /* container */
+    .container{
+      width: min(1150px, 92%);
+      margin: 0 auto;
+      padding: 28px 0 70px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* sections */
+    .section{
+      display:none;
+      animation: pageIn .30s ease both;
+    }
+    .section.active{
+      display:block;
+    }
+    @keyframes pageIn{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* layout */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.25fr .85fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 930px){
+      .hero{ grid-template-columns: 1fr; }
+      .topbar__inner{ align-items:flex-start; flex-wrap:wrap; }
+    }
+
+    .pill{
+      display:inline-flex;
+      padding: 7px 11px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      color: var(--muted);
+      font-weight: 720;
+      gap:10px;
+      align-items:center;
+    }
+    .pill b{ color: var(--text); }
+    .headline{
+      margin: 12px 0 10px;
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -1px;
+    }
+    .subhead{
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+      margin: 0 0 14px;
+      max-width: 62ch;
+    }
+
+    /* typewriter cursor */
+    .cursor{
+      display:inline-block;
+      width: 10px;
+      margin-left: 6px;
+      border-radius: 2px;
+      height: 1.1em;
+      transform: translateY(4px);
+      background: rgba(255,255,255,.75);
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink{ 50%{ opacity: 0; } }
+
+    .card{
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow2);
+    }
+    .card--soft{ background: var(--glass2); }
+    .card__title{
+      margin:0 0 10px;
+      font-size: 18px;
+      letter-spacing:-.2px;
+    }
+    .muted{ color: var(--muted); }
+    .tiny{ font-size: 12px; }
+
+    .photoFrame{
+      border-radius: var(--radius2);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow), 0 0 55px rgba(255,79,163,.16);
+      position: relative;
+    }
+    .photoFrame:after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(800px 500px at 40% 15%, rgba(255,79,163,.20), transparent 55%);
+      pointer-events:none;
+    }
+    .photoFrame img{
+      width:100%;
+      height: 430px;
+      object-fit: cover;
+      display:block;
+    }
+    .photoFrame__caption{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(7,7,16,.74);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* timeline */
+    .timeline{ margin-top: 12px; display:grid; gap: 12px; }
+    .timeline__item{
+      display:flex; gap: 12px;
+      padding: 10px 10px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      transition: .15s ease;
+    }
+    .timeline__item:hover{
+      border-color: rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .timeline__dot{
+      width: 12px; height: 12px;
+      margin-top: 6px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      box-shadow: 0 0 22px rgba(255,79,163,.50);
+      flex:0 0 auto;
+    }
+    .timeline__item h3{
+      margin:0;
+      font-size: 15px;
+    }
+    .timeline__item p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    /* grid home lower */
+    .grid{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    /* valentine card extras */
+    .valentineBox{
+      position: relative;
+      overflow:hidden;
+    }
+    .valentineBox:before{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 20% 20%, rgba(255,79,163,.20), transparent 55%),
+                  radial-gradient(circle at 70% 70%, rgba(159,123,255,.16), transparent 55%);
+      filter: blur(14px);
+      pointer-events:none;
+    }
+    .valentineActions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .valentineResult{
+      margin-top: 12px;
+      display:none;
+      position: relative;
+      z-index: 1;
+    }
+    .valentineResult.show{ display:block; animation: pageIn .25s ease both; }
+
+    /* footer */
+    .footer{
+      border-top: 1px solid rgba(255,255,255,.12);
+      padding: 18px 0;
+      text-align:center;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* floating confetti hearts */
+    .float-heart{
+      position: fixed;
+      bottom: -30px;
+      color: rgba(255,79,163,.92);
+      text-shadow: 0 0 22px rgba(255,79,163,.35);
+      animation: floatUp linear forwards;
+      pointer-events:none;
+      z-index: 9999;
+      will-change: transform, opacity;
+    }
+    @keyframes floatUp{
+      from{ transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+      15%{ opacity: 1; }
+      to{ transform: translateY(-120vh) translateX(var(--drift)) rotate(28deg); opacity: 0; }
+    }
+
+    /* reveal on scroll */
+    .reveal{ opacity:0; transform: translateY(10px); transition: .35s ease; }
+    .reveal.show{ opacity:1; transform: translateY(0); }
+
+    /* ================================
+       FIX: UNIFORM MEMORY IMAGE LAYOUT
+       ================================ */
+    .memory{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 930px){
+      .memory{ grid-template-columns: 1fr; }
+    }
+
+    .memory__img{
+      border-radius: var(--radius2);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow2);
+      aspect-ratio: 4 / 5;          /* keeps all memory images same shape */
+      width: 100%;
+      max-width: 520px;              /* prevents huge images on large screens */
+      margin: 0 auto;                /* centers on mobile and desktop */
+    }
+    .memory__img img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    .memory__text{
+      min-width: 0;
+    }
+
+    /* progress bar styling (kept simple, consistent) */
+    .progressWrap{ display:grid; gap: 8px; }
+    .progress{
+      width:100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+    }
+    .progress > span{
+      display:block;
+      height:100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,79,163,.95), rgba(159,123,255,.75));
+      transition: width .35s ease;
+    }
+
+    .memory__nav{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="aura" aria-hidden="true"></div>
+  <div class="sparkles" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <span class="brand__mark">❤</span>
+        <span>Our Memories</span>
+      </div>
+
+      <nav class="nav" id="nav">
+        <a href="#home" data-page="home" class="active">Home</a>
+        <a href="#m1" data-page="m1">Memory 1</a>
+        <a href="#m2" data-page="m2">Memory 2</a>
+        <a href="#m3" data-page="m3">Memory 3</a>
+        <a href="#m4" data-page="m4">Memory 4</a>
+      </nav>
+
+      <button class="btn btn--ghost" id="musicBtn" type="button" aria-pressed="false">
+        ♪ Music: Off
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HOME -->
+    <section class="section active" id="home">
+      <div class="hero">
+        <div class="reveal">
+          <p class="pill">Valentine Memories • <b>For Miss Kylie</b></p>
+
+          <h1 class="headline">
+            <span id="typewriter" data-text="To my favourite person…"></span><span class="cursor" aria-hidden="true"></span>
+          </h1>
+
+          <p class="subhead">
+            A simple file made with love. Tap through our memories and feel the story again —
+            the laughs, the growth, and the moments that made “us”.
+          </p>
+
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin: 14px 0 18px;">
+            <button class="btn" id="startBtn" type="button">Start the Memories →</button>
+            <button class="btn btn--ghost" id="confettiBtn" type="button">Send Hearts ✨</button>
+          </div>
+
+          <div class="card card--soft reveal">
+            <h2 class="card__title">Our story (09/01/2024 → Today)</h2>
+            <p class="muted">
+              Kylie, From 09/01/2024 we began writing a real chapter — learning each other, choosing each other,
+              and growing through everything. The small days, the hard days, the happy days…
+              all of them shaped “us”.
+            </p>
+
+            <div class="timeline">
+              <div class="timeline__item">
+                <div class="timeline__dot"></div>
+                <div>
+                  <h3>09/01/2024 — The beginning</h3>
+                  <p>We started building something real: trust, friendship, and that feeling of “this matters”.</p>
+                </div>
+              </div>
+
+              <div class="timeline__item">
+                <div class="timeline__dot"></div>
+                <div>
+                  <h3>2024 — Growing closer</h3>
+                  <p>More time, more understanding, more inside jokes, more reasons to choose each other.</p>
+                </div>
+              </div>
+
+              <div class="timeline__item">
+                <div class="timeline__dot"></div>
+                <div>
+                  <h3>2025 — Stronger love</h3>
+                  <p>We kept showing up. Not perfect, but consistent — and that’s what love looks like.</p>
+                </div>
+              </div>
+
+              <div class="timeline__item">
+                <div class="timeline__dot"></div>
+                <div>
+                  <h3>Now — Still us</h3>
+                  <p>Two years of memories… and we’re still writing the next page together.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="photoFrame reveal">
+          <img src="pic5.jpg" alt="Our memory photo 1" />
+          <div class="photoFrame__caption">
+            <strong>Memory #1</strong>
+            <span class="muted">Tap “Start the Memories”.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPLACED: messages section -->
+      <section class="grid">
+        <div class="card card--soft reveal valentineBox">
+          <h2 class="card__title">One question… ❤</h2>
+          <p class="muted" style="line-height:1.7;">
+            I don’t want this to be a long speech… I just want to ask you something simple —
+            and I want your answer to feel special.
+          </p>
+
+          <h3 style="margin:12px 0 0; font-size:22px; letter-spacing:-.2px; position:relative; z-index:1;">
+            Will you be my Valentine?
+          </h3>
+
+          <div class="valentineActions">
+            <button class="btn" id="yesBtn" type="button">Yes 😍</button>
+            <button class="btn btn--ghost" id="noBtn" type="button">No 🙈</button>
+          </div>
+
+          <div class="valentineResult" id="valResult">
+            <div class="card" style="margin-top:12px;">
+              <h3 style="margin:0 0 8px;">You just made my day ❤</h3>
+              <p class="muted" style="margin:0; line-height:1.7;">
+                Thank you for choosing me. I promise to keep choosing you too —
+                with love, patience, and the kind of care that feels like home.
+              </p>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                <button class="btn btn--ghost" id="moreHeartsBtn" type="button">Celebrate ✨</button>
+                <button class="btn btn--ghost" id="goMemBtn" type="button">Go to Memories →</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="muted tiny" style="margin-top:12px; position:relative; z-index:1;">
+            (P.S. If you press “No”, it’s just teasing — I’ll ask again 😌❤)
+          </p>
+        </div>
+      </section>
+    </section>
+
+    <!-- MEMORY 1 -->
+    <section class="section" id="m1">
+      <div class="memory">
+        <div class="memory__img reveal">
+          <img src="pic4.jpg" alt="Our memory photo 2" />
+        </div>
+        <div class="memory__text reveal">
+          <h1 class="headline">Memory 1</h1>
+          <p class="muted">
+            “This was one of those moments that made me sure about you. Not because everything was perfect  but because it felt real. Your smile, your presence, the way you made the day feel softer… that’s when I knew: I want more of ‘us’.”
+          </p>
+
+          <div class="progressWrap card card--soft">
+            <span class="muted" style="font-weight:750;">Progress</span>
+            <div class="progress" aria-label="Memory progress">
+              <span id="progressFill"></span>
+            </div>
+            <span class="muted tiny" id="progressText">1/4</span>
+          </div>
+
+          <div class="memory__nav">
+            <button class="btn btn--ghost" data-go="home" type="button">← Back</button>
+            <button class="btn" data-go="m2" type="button">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMORY 2 -->
+    <section class="section" id="m2">
+      <div class="memory">
+        <div class="memory__img reveal">
+          <img src="pic3.jpg" alt="Our memory photo 3" />
+        </div>
+        <div class="memory__text reveal">
+          <h1 class="headline">Memory 2</h1>
+          <p class="muted">“I love how we can be simple together  just talking, laughing, existing  and it still feels like something special. You’ve been my peace in a loud world, and even the small memories with you feel like a blessing.”</p>
+
+          <div class="progressWrap card card--soft">
+            <span class="muted" style="font-weight:750;">Progress</span>
+            <div class="progress">
+              <span id="progressFill2"></span>
+            </div>
+            <span class="muted tiny" id="progressText2">2/4</span>
+          </div>
+
+          <div class="memory__nav">
+            <button class="btn btn--ghost" data-go="m1" type="button">← Back</button>
+            <button class="btn" data-go="m3" type="button">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMORY 3 -->
+    <section class="section" id="m3">
+      <div class="memory">
+        <div class="memory__img reveal">
+          <img src="pic2.jpg" alt="Our memory photo 4" />
+        </div>
+        <div class="memory__text reveal">
+          <h1 class="headline">Memory 3</h1>
+          <p class="muted">“This memory reminds me that love is not only about big days. It’s the patience, the understanding, the way we keep choosing each other. I’m proud of how far we’ve come… and excited for everything we’re still going to build.”</p>
+
+          <div class="progressWrap card card--soft">
+            <span class="muted" style="font-weight:750;">Progress</span>
+            <div class="progress">
+              <span id="progressFill3"></span>
+            </div>
+            <span class="muted tiny" id="progressText3">3/4</span>
+          </div>
+
+          <div class="memory__nav">
+            <button class="btn btn--ghost" data-go="m2" type="button">← Back</button>
+            <button class="btn" data-go="m4" type="button">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMORY 4 -->
+    <section class="section" id="m4">
+      <div class="memory">
+        <div class="memory__img reveal">
+          <img src="pic1.jpg" alt="Our memory photo 5" />
+        </div>
+        <div class="memory__text reveal">
+          <h1 class="headline">Memory 4</h1>
+          <p class="muted">“If I could replay one feeling forever, it would be this: having you. You’re my favourite person  my safe place, my joy, my motivation. Thank you for loving me the way you do. I’m not leaving… we’re going forward together.”</p>
+
+          <div class="progressWrap card card--soft">
+            <span class="muted" style="font-weight:750;">Progress</span>
+            <div class="progress">
+              <span id="progressFill4"></span>
+            </div>
+            <span class="muted tiny" id="progressText4">4/4</span>
+          </div>
+
+          <div class="card card--soft" style="margin-top:12px;">
+            <h2 class="card__title">Final note</h2>
+            <p class="muted">
+              If love is a decision, I’d still pick you — again and again.
+            </p>
+          </div>
+
+          <div class="memory__nav">
+            <button class="btn btn--ghost" data-go="m3" type="button">← Back</button>
+            <button class="btn" data-go="home" type="button">Home ❤</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Made with love ❤ <span class="muted">| Keep building memories.</span></p>
+  </footer>
+
+  <!-- Optional background audio: put music.mp3 next to index.html -->
+  <audio id="bgMusic" loop>
+    <source src="Dave - Raindance.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // --- Router (one-file multi-page feel) ---
+    const pages = ["home","m1","m2","m3","m4"];
+    const sections = Object.fromEntries(pages.map(p => [p, document.getElementById(p)]));
+    const nav = document.getElementById("nav");
+
+    // progress mapping
+    const progressMap = {
+      m1: { fillId: "progressFill", textId: "progressText", pct: 25, label: "1/4" },
+      m2: { fillId: "progressFill2", textId: "progressText2", pct: 50, label: "2/4" },
+      m3: { fillId: "progressFill3", textId: "progressText3", pct: 75, label: "3/4" },
+      m4: { fillId: "progressFill4", textId: "progressText4", pct: 100, label: "4/4" },
+    };
+
+    function updateProgress(page){
+      const data = progressMap[page];
+      if(!data) return;
+      const fill = document.getElementById(data.fillId);
+      const txt  = document.getElementById(data.textId);
+      if(fill) fill.style.width = data.pct + "%";
+      if(txt) txt.textContent = data.label;
+    }
+
+    function setActive(page){
+      pages.forEach(p => sections[p].classList.toggle("active", p === page));
+      [...nav.querySelectorAll("a")].forEach(a => a.classList.toggle("active", a.dataset.page === page));
+      history.replaceState(null, "", "#" + page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // reveal reset (so it animates per page)
+      document.querySelectorAll(".reveal").forEach(el => el.classList.remove("show"));
+      requestAnimationFrame(() => revealNow());
+
+      updateProgress(page);
+    }
+
+    // nav click
+    nav.addEventListener("click", (e) => {
+      const a = e.target.closest("a");
+      if(!a) return;
+      e.preventDefault();
+      setActive(a.dataset.page);
+    });
+
+    // buttons to move between pages
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-go]");
+      if(!btn) return;
+      setActive(btn.getAttribute("data-go"));
+    });
+
+    // start button
+    document.getElementById("startBtn").addEventListener("click", () => setActive("m1"));
+
+    // load page from hash
+    const hash = (location.hash || "#home").replace("#","");
+    setActive(pages.includes(hash) ? hash : "home");
+
+    // --- Typewriter (smoother) ---
+    const twEl = document.getElementById("typewriter");
+    const twText = twEl.getAttribute("data-text") || "";
+    let twI = 0;
+    const speed = 22; // ms
+    (function type(){
+      twEl.textContent = twText.slice(0, twI);
+      twI++;
+      if(twI <= twText.length) setTimeout(type, speed);
+    })();
+
+    // --- Hearts confetti (nicer) ---
+    const HEARTS = ["❤","💗","💖","💘","💕","✨"];
+    function spawnHeart(){
+      const h = document.createElement("div");
+      h.className = "float-heart";
+      h.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.fontSize = (14 + Math.random()*22) + "px";
+      h.style.animationDuration = (2.7 + Math.random()*1.7) + "s";
+      h.style.setProperty("--drift", ((Math.random()*2-1)*60) + "px");
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 5200);
+    }
+    document.getElementById("confettiBtn").addEventListener("click", () => {
+      for(let k=0;k<42;k++) setTimeout(spawnHeart, k*28);
+    });
+
+    // --- Music toggle ---
+    const musicBtn = document.getElementById("musicBtn");
+    const audio = document.getElementById("bgMusic");
+    musicBtn.addEventListener("click", async () => {
+      const isOn = musicBtn.getAttribute("aria-pressed") === "true";
+      if(isOn){
+        audio.pause();
+        musicBtn.setAttribute("aria-pressed","false");
+        musicBtn.textContent = "♪ Music: Off";
+      } else {
+        try { await audio.play(); } catch(e) {}
+        musicBtn.setAttribute("aria-pressed","true");
+        musicBtn.textContent = "♪ Music: On";
+      }
+    });
+
+    // --- Valentine interaction ---
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const valResult = document.getElementById("valResult");
+    const moreHeartsBtn = document.getElementById("moreHeartsBtn");
+    const goMemBtn = document.getElementById("goMemBtn");
+
+    function celebrate(){
+      for(let k=0;k<55;k++) setTimeout(spawnHeart, k*22);
+    }
+
+    yesBtn.addEventListener("click", () => {
+      valResult.classList.add("show");
+      celebrate();
+    });
+
+    // playful "No" button that runs away a bit 😄
+    let dodge = 0;
+    noBtn.addEventListener("mouseenter", () => {
+      dodge++;
+      const dx = (Math.random()*2-1) * Math.min(220, 90 + dodge*20);
+      const dy = (Math.random()*2-1) * Math.min(120, 50 + dodge*10);
+      noBtn.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    noBtn.addEventListener("click", () => {
+      celebrate();
+      valResult.classList.add("show");
+    });
+
+    moreHeartsBtn.addEventListener("click", celebrate);
+    goMemBtn.addEventListener("click", () => setActive("m1"));
+
+    // --- reveal on scroll ---
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting) en.target.classList.add("show");
+      });
+    }, { threshold: 0.12 });
+
+    function revealNow(){
+      document.querySelectorAll(".section.active .reveal").forEach(el => io.observe(el));
+    }
+    revealNow();
+  </script>
+</body>
+</html>
