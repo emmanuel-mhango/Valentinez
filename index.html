@@ -447,6 +447,17 @@
       flex-wrap: wrap;
       margin-top: 14px;
     }
+    #memoryImage{
+      opacity: 0;
+      transition: opacity .45s ease;
+    }
+    #memoryImage.show{
+      opacity: 1;
+    }
+    #memoryText{
+      min-height: 120px;
+      line-height: 1.7;
+    }
   </style>
 </head>
 
@@ -463,10 +474,7 @@
 
       <nav class="nav" id="nav">
         <a href="#home" data-page="home" class="active">Home</a>
-        <a href="#m1" data-page="m1">Memory 1</a>
-        <a href="#m2" data-page="m2">Memory 2</a>
-        <a href="#m3" data-page="m3">Memory 3</a>
-        <a href="#m4" data-page="m4">Memory 4</a>
+        <a href="#m1" data-page="m1">Memories</a>
       </nav>
 
       <button class="btn btn--ghost" id="musicBtn" type="button" aria-pressed="false">
@@ -593,25 +601,23 @@
     <section class="section" id="m1">
       <div class="memory">
         <div class="memory__img reveal">
-          <img src="pic4.jpg" alt="Our memory photo 2" />
+          <img id="memoryImage" src="pic4.jpg" alt="Our memory photo" />
         </div>
         <div class="memory__text reveal">
-          <h1 class="headline">Memory 1</h1>
-          <p class="muted">
-            “This was one of those moments that made me sure about you. Not because everything was perfect  but because it felt real. Your smile, your presence, the way you made the day feel softer… that’s when I knew: I want more of ‘us’.”
-          </p>
+          <h1 class="headline" id="memoryTitle">Memory 1</h1>
+          <p class="muted" id="memoryText"></p>
 
           <div class="progressWrap card card--soft">
             <span class="muted" style="font-weight:750;">Progress</span>
             <div class="progress" aria-label="Memory progress">
-              <span id="progressFill"></span>
+              <span id="memoryProgressFill"></span>
             </div>
-            <span class="muted tiny" id="progressText">1/4</span>
+            <span class="muted tiny" id="memoryProgressText">1/4</span>
           </div>
 
           <div class="memory__nav">
-            <button class="btn btn--ghost" data-go="home" type="button">← Back</button>
-            <button class="btn" data-go="m2" type="button">Next →</button>
+            <button class="btn btn--ghost" data-go="home" type="button">Back</button>
+            <button class="btn btn--ghost" id="replayMemoriesBtn" type="button">Replay</button>
           </div>
         </div>
       </div>
@@ -713,117 +719,186 @@
     <source src="Dave - Raindance.mp3" type="audio/mpeg">
   </audio>
 
-  <script>
-    // --- Router (one-file multi-page feel) ---
-    const pages = ["home","m1","m2","m3","m4"];
-    const sections = Object.fromEntries(pages.map(p => [p, document.getElementById(p)]));
+    <script>
+    const pages = ["home", "m1"];
+    const sections = Object.fromEntries(pages.map((p) => [p, document.getElementById(p)]));
     const nav = document.getElementById("nav");
 
-    // progress mapping
-    const progressMap = {
-      m1: { fillId: "progressFill", textId: "progressText", pct: 25, label: "1/4" },
-      m2: { fillId: "progressFill2", textId: "progressText2", pct: 50, label: "2/4" },
-      m3: { fillId: "progressFill3", textId: "progressText3", pct: 75, label: "3/4" },
-      m4: { fillId: "progressFill4", textId: "progressText4", pct: 100, label: "4/4" },
-    };
+    const memories = [
+      {
+        title: "Memory 1",
+        image: "pic4.jpg",
+        text: "This was one of those moments that made me sure about you. Not because everything was perfect but because it felt real. Your smile, your presence, the way you made the day feel softer... that's when I knew: I want more of us."
+      },
+      {
+        title: "Memory 2",
+        image: "pic3.jpg",
+        text: "I love how we can be simple together, just talking, laughing, existing, and it still feels like something special. You've been my peace in a loud world, and even the small memories with you feel like a blessing."
+      },
+      {
+        title: "Memory 3",
+        image: "pic2.jpg",
+        text: "This memory reminds me that love is not only about big days. It's the patience, the understanding, the way we keep choosing each other. I'm proud of how far we've come and excited for everything we're still going to build."
+      },
+      {
+        title: "Memory 4",
+        image: "pic1.jpg",
+        text: "If I could replay one feeling forever, it would be this: having you. You're my favorite person, my safe place, my joy, my motivation. Thank you for loving me the way you do. I'm not leaving. We're going forward together."
+      }
+    ];
 
-    function updateProgress(page){
-      const data = progressMap[page];
-      if(!data) return;
-      const fill = document.getElementById(data.fillId);
-      const txt  = document.getElementById(data.textId);
-      if(fill) fill.style.width = data.pct + "%";
-      if(txt) txt.textContent = data.label;
+    const memoryImage = document.getElementById("memoryImage");
+    const memoryTitle = document.getElementById("memoryTitle");
+    const memoryText = document.getElementById("memoryText");
+    const memoryProgressFill = document.getElementById("memoryProgressFill");
+    const memoryProgressText = document.getElementById("memoryProgressText");
+    const replayMemoriesBtn = document.getElementById("replayMemoriesBtn");
+
+    let typingTimer = null;
+    let nextMemoryTimer = null;
+
+    function clearMemoryTimers() {
+      if (typingTimer) clearTimeout(typingTimer);
+      if (nextMemoryTimer) clearTimeout(nextMemoryTimer);
+      typingTimer = null;
+      nextMemoryTimer = null;
     }
 
-    function setActive(page){
-      pages.forEach(p => sections[p].classList.toggle("active", p === page));
-      [...nav.querySelectorAll("a")].forEach(a => a.classList.toggle("active", a.dataset.page === page));
+    function typeText(target, text, onDone) {
+      let i = 0;
+      target.textContent = "";
+
+      const step = () => {
+        target.textContent = text.slice(0, i);
+        i += 1;
+        if (i <= text.length) {
+          typingTimer = setTimeout(step, 18);
+        } else {
+          typingTimer = null;
+          if (onDone) onDone();
+        }
+      };
+
+      step();
+    }
+
+    function showMemory(index) {
+      const item = memories[index];
+      if (!item) return;
+
+      clearMemoryTimers();
+      memoryTitle.textContent = item.title;
+      memoryProgressFill.style.width = (((index + 1) / memories.length) * 100) + "%";
+      memoryProgressText.textContent = `${index + 1}/${memories.length}`;
+      memoryText.textContent = "";
+
+      memoryImage.classList.remove("show");
+      const beginTextSequence = () => {
+        memoryImage.onload = null;
+        memoryImage.classList.add("show");
+        nextMemoryTimer = setTimeout(() => {
+          typeText(memoryText, item.text, () => {
+            if (index < memories.length - 1 && sections.m1.classList.contains("active")) {
+              nextMemoryTimer = setTimeout(() => showMemory(index + 1), 1200);
+            }
+          });
+        }, 260);
+      };
+      memoryImage.onload = beginTextSequence;
+      memoryImage.src = item.image;
+      memoryImage.alt = item.title;
+      if (memoryImage.complete) beginTextSequence();
+    }
+
+    function startMemories() {
+      showMemory(0);
+    }
+
+    function setActive(page) {
+      if (!pages.includes(page)) page = "home";
+      pages.forEach((p) => sections[p].classList.toggle("active", p === page));
+      [...nav.querySelectorAll("a")].forEach((a) => a.classList.toggle("active", a.dataset.page === page));
       history.replaceState(null, "", "#" + page);
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      // reveal reset (so it animates per page)
-      document.querySelectorAll(".reveal").forEach(el => el.classList.remove("show"));
+      document.querySelectorAll(".reveal").forEach((el) => el.classList.remove("show"));
       requestAnimationFrame(() => revealNow());
 
-      updateProgress(page);
+      if (page === "m1") {
+        startMemories();
+      } else {
+        clearMemoryTimers();
+      }
     }
 
-    // nav click
     nav.addEventListener("click", (e) => {
       const a = e.target.closest("a");
-      if(!a) return;
+      if (!a) return;
       e.preventDefault();
       setActive(a.dataset.page);
     });
 
-    // buttons to move between pages
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-go]");
-      if(!btn) return;
+      if (!btn) return;
       setActive(btn.getAttribute("data-go"));
     });
 
-    // start button
     document.getElementById("startBtn").addEventListener("click", () => setActive("m1"));
+    replayMemoriesBtn.addEventListener("click", startMemories);
 
-    // load page from hash
-    const hash = (location.hash || "#home").replace("#","");
+    const hash = (location.hash || "#home").replace("#", "");
     setActive(pages.includes(hash) ? hash : "home");
 
-    // --- Typewriter (smoother) ---
     const twEl = document.getElementById("typewriter");
     const twText = twEl.getAttribute("data-text") || "";
     let twI = 0;
-    const speed = 22; // ms
-    (function type(){
+    (function type() {
       twEl.textContent = twText.slice(0, twI);
       twI++;
-      if(twI <= twText.length) setTimeout(type, speed);
+      if (twI <= twText.length) setTimeout(type, 22);
     })();
 
-    // --- Hearts confetti (nicer) ---
-    const HEARTS = ["❤","💗","💖","💘","💕","✨"];
-    function spawnHeart(){
+    const HEARTS = ["<3", "*", "+", "o", "x", "."];
+    function spawnHeart() {
       const h = document.createElement("div");
       h.className = "float-heart";
-      h.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
+      h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
       h.style.left = Math.random() * 100 + "vw";
-      h.style.fontSize = (14 + Math.random()*22) + "px";
-      h.style.animationDuration = (2.7 + Math.random()*1.7) + "s";
-      h.style.setProperty("--drift", ((Math.random()*2-1)*60) + "px");
+      h.style.fontSize = (14 + Math.random() * 22) + "px";
+      h.style.animationDuration = (2.7 + Math.random() * 1.7) + "s";
+      h.style.setProperty("--drift", ((Math.random() * 2 - 1) * 60) + "px");
       document.body.appendChild(h);
       setTimeout(() => h.remove(), 5200);
     }
+
     document.getElementById("confettiBtn").addEventListener("click", () => {
-      for(let k=0;k<42;k++) setTimeout(spawnHeart, k*28);
+      for (let k = 0; k < 42; k++) setTimeout(spawnHeart, k * 28);
     });
 
-    // --- Music toggle ---
     const musicBtn = document.getElementById("musicBtn");
     const audio = document.getElementById("bgMusic");
     musicBtn.addEventListener("click", async () => {
       const isOn = musicBtn.getAttribute("aria-pressed") === "true";
-      if(isOn){
+      if (isOn) {
         audio.pause();
-        musicBtn.setAttribute("aria-pressed","false");
-        musicBtn.textContent = "♪ Music: Off";
+        musicBtn.setAttribute("aria-pressed", "false");
+        musicBtn.textContent = "Music: Off";
       } else {
-        try { await audio.play(); } catch(e) {}
-        musicBtn.setAttribute("aria-pressed","true");
-        musicBtn.textContent = "♪ Music: On";
+        try { await audio.play(); } catch (e) {}
+        musicBtn.setAttribute("aria-pressed", "true");
+        musicBtn.textContent = "Music: On";
       }
     });
 
-    // --- Valentine interaction ---
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
     const valResult = document.getElementById("valResult");
     const moreHeartsBtn = document.getElementById("moreHeartsBtn");
     const goMemBtn = document.getElementById("goMemBtn");
 
-    function celebrate(){
-      for(let k=0;k<55;k++) setTimeout(spawnHeart, k*22);
+    function celebrate() {
+      for (let k = 0; k < 55; k++) setTimeout(spawnHeart, k * 22);
     }
 
     yesBtn.addEventListener("click", () => {
@@ -831,12 +906,11 @@
       celebrate();
     });
 
-    // playful "No" button that runs away a bit 😄
     let dodge = 0;
     noBtn.addEventListener("mouseenter", () => {
       dodge++;
-      const dx = (Math.random()*2-1) * Math.min(220, 90 + dodge*20);
-      const dy = (Math.random()*2-1) * Math.min(120, 50 + dodge*10);
+      const dx = (Math.random() * 2 - 1) * Math.min(220, 90 + dodge * 20);
+      const dy = (Math.random() * 2 - 1) * Math.min(120, 50 + dodge * 10);
       noBtn.style.transform = `translate(${dx}px, ${dy}px)`;
     });
     noBtn.addEventListener("click", () => {
@@ -847,17 +921,17 @@
     moreHeartsBtn.addEventListener("click", celebrate);
     goMemBtn.addEventListener("click", () => setActive("m1"));
 
-    // --- reveal on scroll ---
-    const io = new IntersectionObserver((entries)=>{
-      entries.forEach(en=>{
-        if(en.isIntersecting) en.target.classList.add("show");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) en.target.classList.add("show");
       });
     }, { threshold: 0.12 });
 
-    function revealNow(){
-      document.querySelectorAll(".section.active .reveal").forEach(el => io.observe(el));
+    function revealNow() {
+      document.querySelectorAll(".section.active .reveal").forEach((el) => io.observe(el));
     }
     revealNow();
   </script>
 </body>
 </html>
+
