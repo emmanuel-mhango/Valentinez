@@ -445,12 +445,13 @@
     .float-heart{
       position: fixed;
       bottom: -30px;
-      color: rgba(255,170,188,.95);
-      text-shadow: 0 0 22px rgba(255,116,149,.38);
+      color: rgba(214, 18, 53, .96);
+      text-shadow: 0 0 20px rgba(255, 91, 136, .45);
       animation: floatUp linear forwards;
       pointer-events:none;
       z-index: 9999;
       will-change: transform, opacity;
+      user-select:none;
     }
     @keyframes floatUp{
       from{ transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
@@ -1023,6 +1024,21 @@
       font-family: "Cormorant Garamond", serif;
       letter-spacing: .3px;
     }
+    .memoryControls{
+      margin-top: 14px;
+      display:flex;
+      justify-content:center;
+      gap: 10px;
+      flex-wrap: nowrap;
+    }
+    .memoryControls .btn{
+      min-width: 118px;
+      justify-content:center;
+    }
+    .memorySectionTitle{
+      margin: 0 0 12px;
+      text-align: center;
+    }
     .storyNarrative{
       margin-top: 14px;
       border: 1px solid #dccfbd;
@@ -1084,8 +1100,8 @@
         <span>Our Memories</span>
       </div>
 
-      <button class="btn btn--ghost" id="musicBtn" type="button" aria-pressed="false">
-        ♪ Music: Off
+      <button class="btn btn--ghost" id="musicBtn" type="button" aria-pressed="true">
+        ♪ Music: On
       </button>
     </div>
   </header>
@@ -1171,17 +1187,23 @@
 
           </article>
         </div>
+      </div>
+    </section>
 
     <!-- MEMORY 1 -->
     <section class="section" id="m1">
+      <h2 class="storyTitle memorySectionTitle">OUR MEMORY</h2>
       <div class="memory">
         <div class="memory__img reveal">
           <img id="memoryImage" src="pic4.jpg" alt="Our memory photo" />
         </div>
         <div class="memory__text reveal">
-          <h2 class="storyTitle" style="margin: 0 0 6px;">OUR MEMORIES</h2>
           <h1 class="headline" id="memoryTitle">Memory 1</h1>
           <p class="muted" id="memoryText"></p>
+          <div class="memoryControls">
+            <button class="btn btn--ghost" id="pauseMemoriesBtn" type="button">Pause</button>
+            <button class="btn" id="continueMemoriesBtn" type="button">Continue</button>
+          </div>
         </div>
       </div>
     </section>
@@ -1189,11 +1211,11 @@
   </main>
 
   <footer class="footer">
-    <p>Made with love ❤ | Keep building memories.</span></p>
+    <p>Made with love ❤ | Keep building memories.</p>
   </footer>
 
   <!-- Optional background audio: put music.mp3 next to index.html -->
-  <audio id="bgMusic" loop>
+  <audio id="bgMusic" loop autoplay>
     <source src="Dave - Raindance.mp3" type="audio/mpeg">
   </audio>
 
@@ -1225,16 +1247,38 @@
     const memoryTitle = document.getElementById("memoryTitle");
     const memoryText = document.getElementById("memoryText");
     const memoriesSection = document.getElementById("m1");
+    const pauseMemoriesBtn = document.getElementById("pauseMemoriesBtn");
+    const continueMemoriesBtn = document.getElementById("continueMemoriesBtn");
 
     let typingTimer = null;
     let nextMemoryTimer = null;
+    let currentMemoryIndex = 0;
+    let memoryReady = false;
+    let memoriesPaused = false;
+
+    function updateMemoryControls() {
+      pauseMemoriesBtn.textContent = memoriesPaused ? "Resume" : "Pause";
+      continueMemoriesBtn.disabled = !memoryReady;
+      continueMemoriesBtn.style.opacity = memoryReady ? "1" : ".6";
+    }
+
+    function queueNextMemory() {
+      if (memoriesPaused || !memoryReady) return;
+      if (nextMemoryTimer) clearTimeout(nextMemoryTimer);
+      nextMemoryTimer = setTimeout(() => {
+        const nextIndex = currentMemoryIndex < memories.length - 1 ? currentMemoryIndex + 1 : 0;
+        showMemory(nextIndex);
+      }, 2400);
+    }
 
     function clearMemoryTimers() {
       if (typingTimer) clearTimeout(typingTimer);
       if (nextMemoryTimer) clearTimeout(nextMemoryTimer);
       typingTimer = null;
       nextMemoryTimer = null;
+      memoryReady = false;
       memoryText.classList.remove("show");
+      updateMemoryControls();
     }
 
     function typeText(target, text, onDone) {
@@ -1258,6 +1302,7 @@
     function showMemory(index) {
       const item = memories[index];
       if (!item) return;
+      currentMemoryIndex = index;
 
       clearMemoryTimers();
       memoryTitle.textContent = item.title;
@@ -1273,8 +1318,9 @@
         nextMemoryTimer = setTimeout(() => {
           memoryText.classList.add("show");
           typeText(memoryText, item.text, () => {
-            const nextIndex = index < memories.length - 1 ? index + 1 : 0;
-            nextMemoryTimer = setTimeout(() => showMemory(nextIndex), 1650);
+            memoryReady = true;
+            updateMemoryControls();
+            queueNextMemory();
           });
         }, 520);
       };
@@ -1292,6 +1338,24 @@
       memoriesSection.scrollIntoView({ behavior: "smooth", block: "start" });
       startMemories();
     });
+    pauseMemoriesBtn.addEventListener("click", () => {
+      memoriesPaused = !memoriesPaused;
+      updateMemoryControls();
+      if (memoriesPaused) {
+        if (nextMemoryTimer) clearTimeout(nextMemoryTimer);
+        nextMemoryTimer = null;
+      } else {
+        queueNextMemory();
+      }
+    });
+    continueMemoriesBtn.addEventListener("click", () => {
+      if (!memoryReady) return;
+      if (nextMemoryTimer) clearTimeout(nextMemoryTimer);
+      nextMemoryTimer = null;
+      const nextIndex = currentMemoryIndex < memories.length - 1 ? currentMemoryIndex + 1 : 0;
+      showMemory(nextIndex);
+    });
+    updateMemoryControls();
     startMemories();
 
     const twEl = document.getElementById("typewriter");
@@ -1302,41 +1366,66 @@
       twEl.textContent = twText.slice(0, twI);
       twI++;
       if (twI <= twText.length) {
-        setTimeout(type, 22);
+        setTimeout(type, 36);
       } else if (twCursor) {
         twCursor.classList.add("done");
       }
     })();
 
-    const HEARTS = ["<3", "*", "+", "o", "x", "."];
+    const HEARTS = ["❤"];
     function spawnHeart() {
       const h = document.createElement("div");
       h.className = "float-heart";
       h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
       h.style.left = Math.random() * 100 + "vw";
-      h.style.fontSize = (14 + Math.random() * 22) + "px";
-      h.style.animationDuration = (2.7 + Math.random() * 1.7) + "s";
-      h.style.setProperty("--drift", ((Math.random() * 2 - 1) * 60) + "px");
+      h.style.fontSize = (16 + Math.random() * 28) + "px";
+      h.style.animationDuration = (3.2 + Math.random() * 2.2) + "s";
+      h.style.setProperty("--drift", ((Math.random() * 2 - 1) * 100) + "px");
       document.body.appendChild(h);
-      setTimeout(() => h.remove(), 5200);
+      setTimeout(() => h.remove(), 6200);
     }
     document.getElementById("confettiBtn").addEventListener("click", () => {
-      for (let k = 0; k < 42; k++) setTimeout(spawnHeart, k * 28);
+      for (let k = 0; k < 110; k++) setTimeout(spawnHeart, k * 16);
     });
 
     const musicBtn = document.getElementById("musicBtn");
     const audio = document.getElementById("bgMusic");
+    let userPausedMusic = false;
+
+    function setMusicState(isOn) {
+      musicBtn.setAttribute("aria-pressed", isOn ? "true" : "false");
+      musicBtn.textContent = isOn ? "Music: On" : "Music: Off";
+    }
+
+    async function ensureMusicOn() {
+      if (userPausedMusic) return;
+      try {
+        await audio.play();
+        setMusicState(true);
+      } catch (e) {
+        setMusicState(false);
+      }
+    }
+
     musicBtn.addEventListener("click", async () => {
       const isOn = musicBtn.getAttribute("aria-pressed") === "true";
       if (isOn) {
+        userPausedMusic = true;
         audio.pause();
-        musicBtn.setAttribute("aria-pressed", "false");
-        musicBtn.textContent = "Music: Off";
+        setMusicState(false);
       } else {
-        try { await audio.play(); } catch (e) {}
-        musicBtn.setAttribute("aria-pressed", "true");
-        musicBtn.textContent = "Music: On";
+        userPausedMusic = false;
+        await ensureMusicOn();
       }
+    });
+
+    ensureMusicOn();
+    window.addEventListener("focus", ensureMusicOn);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) ensureMusicOn();
+    });
+    ["click", "keydown", "touchstart"].forEach((ev) => {
+      window.addEventListener(ev, ensureMusicOn, { once: true, passive: true });
     });
 
     const io = new IntersectionObserver((entries) => {
