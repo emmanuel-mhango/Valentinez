@@ -1027,6 +1027,33 @@
       font-family: "Cormorant Garamond", serif;
       letter-spacing: .3px;
     }
+    .loveTicker{
+      background: transparent;
+      overflow: hidden;
+      height: 28px;
+      display:flex;
+      align-items:center;
+      margin: 0 18px;
+      white-space: nowrap;
+    }
+    .loveTicker__track{
+      display:inline-flex;
+      width:max-content;
+      animation: loveSlide 20s linear infinite;
+      will-change: transform;
+    }
+    .loveTicker__chunk{
+      color: #5c2a32;
+      font-family: "Montserrat", sans-serif;
+      font-size: .72rem;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding-right: 28px;
+    }
+    @keyframes loveSlide{
+      from{ transform: translateX(0); }
+      to{ transform: translateX(-50%); }
+    }
     .memoryControls{
       margin-top: 14px;
       display:flex;
@@ -1192,6 +1219,12 @@
         </div>
       </div>
     </section>
+    <div class="loveTicker" aria-hidden="true">
+      <div class="loveTicker__track">
+        <span class="loveTicker__chunk">I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU •</span>
+        <span class="loveTicker__chunk">I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU • I LOVE YOU •</span>
+      </div>
+    </div>
 
     <!-- MEMORY 1 -->
     <section class="section" id="m1">
